@@ -1,6 +1,6 @@
 #include "TexturedShader.h"
 
-char *getVertexShaderSource() {
+char *getTexturedVertexShaderSource() {
     return
             "#version 330 core\n"
             "layout (location = 0) in vec3 aPos;"
@@ -23,7 +23,7 @@ char *getVertexShaderSource() {
 }
 
 
-char *getFragmentShaderSource() {
+char *getTexturedFragmentShaderSource() {
     return
             "#version 330 core\n"
             "in vec3 vertexColor;"

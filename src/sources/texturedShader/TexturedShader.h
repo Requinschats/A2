@@ -1,3 +1,3 @@
-class TexturedShader {
+char *getTexturedVertexShaderSource();
 
-};
+char *getTexturedFragmentShaderSource();

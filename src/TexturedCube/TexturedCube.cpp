@@ -1,7 +1,15 @@
 #include "TexturedCube.h"
 #include "glm/glm.hpp"
-//import opengl
 #include <GL/glew.h>
+#include <iostream>
+#include "../sources/texturedShader/TexturedShader.h"
+#include "../Shaders/shaders.h"
+
+#define STB_IMAGE_IMPLEMENTATION
+
+#include "../include/stb_image.h"
+#include "../TranslateMatrix/TranslateMatrix.h"
+#include "../Controller/Controller.h"
 
 using namespace glm;
 
@@ -13,6 +21,44 @@ struct TexturedColoredVertex {
     vec3 color;
     vec2 uv;
 };
+
+GLuint loadTexture(const char *filename) {
+    // Step1 Create and bind textures
+    GLuint textureId = 0;
+    glGenTextures(1, &textureId);
+    assert(textureId != 0);
+
+
+    glBindTexture(GL_TEXTURE_2D, textureId);
+
+    // Step2 Set filter parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // Step3 Load Textures with dimension data
+    int width, height, nrChannels;
+    unsigned char *data = stbi_load(filename, &width, &height, &nrChannels, 0);
+    if (!data) {
+        std::cerr << "Error::Texture could not load texture file:" << filename << std::endl;
+        return 0;
+    }
+
+    // Step4 Upload the texture to the PU
+    GLenum format = 0;
+    if (nrChannels == 1)
+        format = GL_RED;
+    else if (nrChannels == 3)
+        format = GL_RGB;
+    else if (nrChannels == 4)
+        format = GL_RGBA;
+    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height,
+                 0, format, GL_UNSIGNED_BYTE, data);
+
+    // Step5 Free resources
+    stbi_image_free(data);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    return textureId;
+}
 
 const TexturedColoredVertex texturedCubeVertexArray[] = {  // position,                            color
         TexturedColoredVertex(vec3(-0.5f, -0.5f, -0.5f), vec3(1.0f, 0.0f, 0.0f), vec2(0.0f, 0.0f)), //left - red
@@ -105,11 +151,18 @@ int createTexturedCubeVertexArrayObject() {
     return vertexArrayObject;
 }
 
-void DrawTexturedCube(int vertexArrayObject) {
+void DrawTexturedCube(int vertexArrayObject, TranslateMatrix *translateMatrix) {
+    GLuint brickTextureID = loadTexture("assets/textures/brick.jpg");
     int texturedShaderProgram = compileAndLinkShaders(getTexturedVertexShaderSource(),
                                                       getTexturedFragmentShaderSource());
     int texturedCubeVAO = createTexturedCubeVertexArrayObject();
     glBindVertexArray(texturedCubeVAO);
     glUseProgram(texturedShaderProgram);
+
+    Controller *controller = new Controller(&texturedShaderProgram);
+
+    translateMatrix->setDefaultPosition();
+    translateMatrix->setDefaultSize();
+    translateMatrix->bindTranslationMatrix(texturedShaderProgram);
 }
 
