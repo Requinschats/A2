@@ -21,15 +21,17 @@ include(BuildGLM)
 
 set(EXEC A1)
 
+set(ASSETS assets)
 
 file(GLOB SRC src/*.cpp src/*/*.cpp src/*/*.h src/sources/*/*.cpp src/sources/*/*.h)
 
-add_executable(${EXEC} ${SRC})
+add_executable(${EXEC} ${SRC} src/TexturedCube/TexturedCube.cpp src/TexturedCube/TexturedCube.h src/sources/texturedShader/TexturedShader.cpp src/sources/texturedShader/TexturedShader.h)
 target_link_libraries(${EXEC} OpenGL::GL glew_s glfw glm)
 
 list(APPEND BIN ${EXEC})
 
 # install files to install location
 install(TARGETS ${BIN} DESTINATION ${CMAKE_INSTALL_PREFIX})
+install(DIRECTORY ${ASSETS} DESTINATION ${CMAKE_INSTALL_PREFIX})
 
 
